@@ -312,34 +312,37 @@ function getCodeTree({ astGenerator, language, code, defaultCodeValue }) {
 }
 
 export default function(defaultAstGenerator, defaultStyle) {
-  return function SyntaxHighlighter({
-    language,
-    children,
-    style = defaultStyle,
-    customStyle = {},
-    codeTagProps = {
-      className: language ? `language-${language}` : undefined,
-      style: {
-        ...style['code[class*="language-"]'],
-        ...style[`code[class*="language-${language}"]`]
-      }
+  return React.forwardRef(function SyntaxHighlighter(
+    {
+      language,
+      children,
+      style = defaultStyle,
+      customStyle = {},
+      codeTagProps = {
+        className: language ? `language-${language}` : undefined,
+        style: {
+          ...style['code[class*="language-"]'],
+          ...style[`code[class*="language-${language}"]`]
+        }
+      },
+      useInlineStyles = true,
+      showLineNumbers = false,
+      showInlineLineNumbers = true,
+      startingLineNumber = 1,
+      lineNumberContainerStyle,
+      lineNumberStyle = {},
+      wrapLines,
+      wrapLongLines = false,
+      lineProps = {},
+      renderer,
+      PreTag = 'pre',
+      CodeTag = 'code',
+      code = Array.isArray(children) ? children[0] : children,
+      astGenerator,
+      ...rest
     },
-    useInlineStyles = true,
-    showLineNumbers = false,
-    showInlineLineNumbers = true,
-    startingLineNumber = 1,
-    lineNumberContainerStyle,
-    lineNumberStyle = {},
-    wrapLines,
-    wrapLongLines = false,
-    lineProps = {},
-    renderer,
-    PreTag = 'pre',
-    CodeTag = 'code',
-    code = Array.isArray(children) ? children[0] : children,
-    astGenerator,
-    ...rest
-  }) {
+    ref
+  ) {
     astGenerator = astGenerator || defaultAstGenerator;
 
     const allLineNumbers = showLineNumbers ? (
@@ -368,7 +371,7 @@ export default function(defaultAstGenerator, defaultStyle) {
 
     if (!astGenerator) {
       return (
-        <PreTag {...preProps}>
+        <PreTag ref={ref} {...preProps}>
           {allLineNumbers}
           <CodeTag {...codeTagProps}>{code}</CodeTag>
         </PreTag>
@@ -416,12 +419,12 @@ export default function(defaultAstGenerator, defaultStyle) {
     }
 
     return (
-      <PreTag {...preProps}>
+      <PreTag ref={ref} {...preProps}>
         <CodeTag {...codeTagProps}>
           {!showInlineLineNumbers && allLineNumbers}
           {renderer({ rows, stylesheet: style, useInlineStyles })}
         </CodeTag>
       </PreTag>
     );
-  };
+  });
 }
